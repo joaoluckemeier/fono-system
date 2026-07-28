@@ -1,0 +1,11 @@
+__pycache__/
+nginx/certs/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.prod
+.pytest_cache/
+.ruff_cache/
+*.log
+.DS_Store
