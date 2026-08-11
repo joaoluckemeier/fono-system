@@ -17,8 +17,10 @@ class AuditMiddleware(BaseHTTPMiddleware):
         request.state.auditoria = {
             "acao": AcaoAuditoria.VISUALIZAR, "entidade_tipo": "paciente", "entidade_id": id,
         }
-    e este middleware persiste o registro depois que a resposta e computada, sem o router
-    precisar conhecer AuditLogger diretamente.
+    ou, para endpoints de listagem que expoem varias entidades numa unica resposta, uma lista
+    de dicts no mesmo formato (um registro por entidade retornada). Este middleware persiste
+    o(s) registro(s) depois que a resposta e computada, sem o router precisar conhecer
+    AuditLogger diretamente.
     """
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
@@ -29,17 +31,21 @@ class AuditMiddleware(BaseHTTPMiddleware):
         if auditoria is None or usuario_atual is None:
             return response
 
+        registros = auditoria if isinstance(auditoria, list) else [auditoria]
+        ip_origem = request.client.host if request.client else "desconhecido"
+
         try:
             async with async_session_factory() as session:
                 audit_logger = AuditLogger(LogAcessoRepositoryImpl(session))
-                await audit_logger.registrar(
-                    clinica_id=usuario_atual.clinica_id,
-                    usuario_id=usuario_atual.id,
-                    acao=auditoria["acao"],
-                    entidade_tipo=auditoria["entidade_tipo"],
-                    entidade_id=auditoria["entidade_id"],
-                    ip_origem=request.client.host if request.client else "desconhecido",
-                )
+                for registro in registros:
+                    await audit_logger.registrar(
+                        clinica_id=usuario_atual.clinica_id,
+                        usuario_id=usuario_atual.id,
+                        acao=registro["acao"],
+                        entidade_tipo=registro["entidade_tipo"],
+                        entidade_id=registro["entidade_id"],
+                        ip_origem=ip_origem,
+                    )
         except Exception:
             logger.exception("falha_ao_gravar_log_acesso")
 

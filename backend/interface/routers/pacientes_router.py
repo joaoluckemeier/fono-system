@@ -70,10 +70,21 @@ def _serializar(dto: PacienteDTO, papel: str) -> PacienteResponse | PacienteResp
 
 @router.get("", response_model=list[PacienteResponse] | list[PacienteResponseCadastral])
 async def listar_pacientes(
+    request: Request,
     usuario_atual: UsuarioAutenticadoDTO = Depends(get_usuario_atual),
     use_case: ListarPacientesUseCase = Depends(get_listar_pacientes_use_case),
 ) -> list[PacienteResponse | PacienteResponseCadastral]:
     pacientes = await use_case.executar(usuario_atual.clinica_id)
+
+    if pacientes:
+        request.state.auditoria = [
+            {
+                "acao": AcaoAuditoria.VISUALIZAR,
+                "entidade_tipo": "paciente",
+                "entidade_id": p.id,
+            }
+            for p in pacientes
+        ]
     return [_serializar(p, usuario_atual.papel) for p in pacientes]
 
 

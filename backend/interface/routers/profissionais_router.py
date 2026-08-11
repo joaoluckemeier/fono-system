@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from backend.application.dtos.auth_dto import UsuarioAutenticadoDTO
 from backend.application.dtos.profissional_caso_dto import CriarProfissionalCasoInputDTO
@@ -19,6 +19,7 @@ from backend.container import (
     get_deletar_profissional_use_case,
     get_listar_profissionais_use_case,
 )
+from backend.domain.entities.log_acesso import AcaoAuditoria
 from backend.interface.dependencies import get_usuario_atual
 from backend.interface.schemas.profissional_caso_schema import (
     ProfissionalCasoCreate,
@@ -31,10 +32,21 @@ router = APIRouter(tags=["profissionais-caso"])
 @router.get("/pacientes/{paciente_id}/profissionais", response_model=list[ProfissionalCasoResponse])
 async def listar_profissionais(
     paciente_id: UUID,
+    request: Request,
     usuario_atual: UsuarioAutenticadoDTO = Depends(get_usuario_atual),
     use_case: ListarProfissionaisUseCase = Depends(get_listar_profissionais_use_case),
 ) -> list[ProfissionalCasoResponse]:
     profissionais = await use_case.executar(paciente_id, usuario_atual.clinica_id)
+
+    if profissionais:
+        request.state.auditoria = [
+            {
+                "acao": AcaoAuditoria.VISUALIZAR,
+                "entidade_tipo": "profissional_caso",
+                "entidade_id": p.id,
+            }
+            for p in profissionais
+        ]
     return [ProfissionalCasoResponse(**p.__dict__) for p in profissionais]
 
 

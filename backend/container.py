@@ -388,8 +388,19 @@ def get_deletar_evolucao_use_case(
 def get_criar_anexo_use_case(
     anexo_repository: AnexoRepository = Depends(get_anexo_repository),
     storage_service: StorageServiceInterface = Depends(get_storage_service),
+    paciente_repository: PacienteRepository = Depends(get_paciente_repository),
+    evolucao_repository: EvolucaoRepository = Depends(get_evolucao_repository),
+    protocolo_paciente_repository: ProtocoloPacienteRepository = Depends(
+        get_protocolo_paciente_repository
+    ),
 ) -> CriarAnexoUseCase:
-    return CriarAnexoUseCase(anexo_repository, storage_service)
+    return CriarAnexoUseCase(
+        anexo_repository,
+        storage_service,
+        paciente_repository,
+        evolucao_repository,
+        protocolo_paciente_repository,
+    )
 
 
 def get_listar_anexos_use_case(

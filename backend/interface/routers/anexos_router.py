@@ -24,16 +24,30 @@ router = APIRouter(prefix="/anexos", tags=["anexos"])
 
 @router.get("", response_model=list[AnexoResponse])
 async def listar_anexos(
+    request: Request,
     entidade_tipo: str,
     entidade_id: UUID,
     usuario_atual: UsuarioAutenticadoDTO = Depends(get_usuario_atual),
     use_case: ListarAnexosUseCase = Depends(get_listar_anexos_use_case),
 ) -> list[AnexoResponse]:
     try:
-        anexos = await use_case.executar(entidade_tipo, entidade_id, usuario_atual.clinica_id)
+        anexos = await use_case.executar(
+            entidade_tipo, entidade_id, usuario_atual.clinica_id, PapelUsuario(usuario_atual.papel)
+        )
+    except PermissaoNegadaError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
+    if anexos:
+        request.state.auditoria = [
+            {
+                "acao": AcaoAuditoria.VISUALIZAR,
+                "entidade_tipo": "anexo",
+                "entidade_id": a.id,
+            }
+            for a in anexos
+        ]
     return [AnexoResponse(**a.__dict__) for a in anexos]
 
 
@@ -63,6 +77,8 @@ async def criar_anexo(
         )
     except PermissaoNegadaError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except RecursoNaoEncontradoError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 

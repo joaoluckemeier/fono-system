@@ -1,5 +1,6 @@
 from enum import Enum
 
+from backend.domain.entities.anexo import EntidadeAnexavel
 from backend.domain.entities.usuario import PapelUsuario
 
 
@@ -30,3 +31,10 @@ def usuario_pode(papel: PapelUsuario, recurso: Recurso) -> bool:
     Nunca fazer `if papel == "admin"` solto em router: sempre passar por aqui.
     """
     return papel in _MATRIZ_PERMISSOES.get(recurso, set())
+
+
+RECURSO_POR_ENTIDADE_ANEXO: dict[EntidadeAnexavel, Recurso] = {
+    EntidadeAnexavel.EVOLUCAO: Recurso.ANEXO_CLINICO,
+    EntidadeAnexavel.PACIENTE: Recurso.ANEXO_NAO_CLINICO,
+    EntidadeAnexavel.PROTOCOLO_PACIENTE: Recurso.ANEXO_NAO_CLINICO,
+}

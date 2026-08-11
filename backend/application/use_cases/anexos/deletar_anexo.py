@@ -1,17 +1,10 @@
 from uuid import UUID
 
 from backend.application.exceptions import PermissaoNegadaError, RecursoNaoEncontradoError
-from backend.domain.authorization.policy import Recurso, usuario_pode
-from backend.domain.entities.anexo import EntidadeAnexavel
+from backend.domain.authorization.policy import RECURSO_POR_ENTIDADE_ANEXO, usuario_pode
 from backend.domain.entities.usuario import PapelUsuario
 from backend.domain.repositories.anexo_repository import AnexoRepository
 from backend.domain.services.storage_service import StorageServiceInterface
-
-_RECURSO_POR_ENTIDADE = {
-    EntidadeAnexavel.EVOLUCAO: Recurso.ANEXO_CLINICO,
-    EntidadeAnexavel.PACIENTE: Recurso.ANEXO_NAO_CLINICO,
-    EntidadeAnexavel.PROTOCOLO_PACIENTE: Recurso.ANEXO_NAO_CLINICO,
-}
 
 
 class DeletarAnexoUseCase:
@@ -26,7 +19,7 @@ class DeletarAnexoUseCase:
         if anexo is None:
             raise RecursoNaoEncontradoError("Anexo nao encontrado")
 
-        recurso = _RECURSO_POR_ENTIDADE[anexo.entidade_tipo]
+        recurso = RECURSO_POR_ENTIDADE_ANEXO[anexo.entidade_tipo]
         if not usuario_pode(papel, recurso):
             raise PermissaoNegadaError("Papel sem permissao para excluir este anexo")
 
