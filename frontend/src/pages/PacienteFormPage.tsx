@@ -24,7 +24,10 @@ const VAZIO: PacienteInput = {
   nome_irmaos: "",
   faz_uso_medicamento: "",
   diagnostico: "",
-  data_inicio_nipwin: "",
+  data_inicio: "",
+  queixa_principal: "",
+  informacoes_nascimento: "",
+  observacoes: "",
 };
 
 export function PacienteFormPage() {
@@ -51,7 +54,10 @@ export function PacienteFormPage() {
           nome_irmaos: paciente.nome_irmaos ?? "",
           faz_uso_medicamento: paciente.faz_uso_medicamento ?? "",
           diagnostico: paciente.diagnostico ?? "",
-          data_inicio_nipwin: paciente.data_inicio_nipwin ?? "",
+          data_inicio: paciente.data_inicio ?? "",
+          queixa_principal: paciente.queixa_principal ?? "",
+          informacoes_nascimento: paciente.informacoes_nascimento ?? "",
+          observacoes: paciente.observacoes ?? "",
         }),
       )
       .catch(() => toast.error("Não foi possível carregar o paciente"))
@@ -66,7 +72,10 @@ export function PacienteFormPage() {
         ...form,
         nome_irmaos: form.nome_irmaos || null,
         diagnostico: form.diagnostico || null,
-        data_inicio_nipwin: form.data_inicio_nipwin || null,
+        data_inicio: form.data_inicio || null,
+        queixa_principal: form.queixa_principal || null,
+        informacoes_nascimento: form.informacoes_nascimento || null,
+        observacoes: form.observacoes || null,
       };
       const salvo = id
         ? await pacientesApi.atualizar(id, payload)
@@ -159,6 +168,14 @@ export function PacienteFormPage() {
             />
           </div>
           <div className="flex flex-col gap-1.5">
+            <Label htmlFor="queixa_principal">Queixa principal da família</Label>
+            <Textarea
+              id="queixa_principal"
+              value={form.queixa_principal ?? ""}
+              onChange={(e) => setForm({ ...form, queixa_principal: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="diagnostico">Diagnóstico</Label>
             <Textarea
               id="diagnostico"
@@ -167,12 +184,12 @@ export function PacienteFormPage() {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="data_inicio_nipwin">Data de início do NIPWIN</Label>
+            <Label htmlFor="data_inicio">Data de início</Label>
             <Input
-              id="data_inicio_nipwin"
+              id="data_inicio"
               type="date"
-              value={form.data_inicio_nipwin ?? ""}
-              onChange={(e) => setForm({ ...form, data_inicio_nipwin: e.target.value })}
+              value={form.data_inicio ?? ""}
+              onChange={(e) => setForm({ ...form, data_inicio: e.target.value })}
             />
           </div>
 
@@ -180,6 +197,26 @@ export function PacienteFormPage() {
             {salvando ? "Salvando..." : "Salvar"}
           </Button>
         </form>
+      </Card>
+
+      <Card className="max-w-lg p-6">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Informações ao nascer</h2>
+        <Textarea
+          aria-label="Informações ao nascer"
+          value={form.informacoes_nascimento ?? ""}
+          onChange={(e) =>
+            setForm({ ...form, informacoes_nascimento: e.target.value })
+          }
+        />
+      </Card>
+
+      <Card className="max-w-lg p-6">
+        <h2 className="mb-4 text-base font-semibold text-foreground">Observações</h2>
+        <Textarea
+          aria-label="Observações"
+          value={form.observacoes ?? ""}
+          onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+        />
       </Card>
     </div>
   );

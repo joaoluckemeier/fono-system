@@ -12,6 +12,8 @@ class Recurso(Enum):
     ANEXO_NAO_CLINICO = "anexo_nao_clinico"
     USUARIOS = "usuarios"
     LOGS_AUDITORIA = "logs_auditoria"
+    TERMO_MODELO = "termo_modelo"
+    TERMO_GERACAO = "termo_geracao"
 
 
 _MATRIZ_PERMISSOES: dict[Recurso, set[PapelUsuario]] = {
@@ -22,6 +24,8 @@ _MATRIZ_PERMISSOES: dict[Recurso, set[PapelUsuario]] = {
     Recurso.ANEXO_NAO_CLINICO: {PapelUsuario.ADMIN, PapelUsuario.FONO, PapelUsuario.SECRETARIA},
     Recurso.USUARIOS: {PapelUsuario.ADMIN},
     Recurso.LOGS_AUDITORIA: {PapelUsuario.ADMIN},
+    Recurso.TERMO_MODELO: {PapelUsuario.ADMIN},
+    Recurso.TERMO_GERACAO: {PapelUsuario.ADMIN, PapelUsuario.FONO},
 }
 
 

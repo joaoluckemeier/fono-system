@@ -19,8 +19,11 @@ class CriarPacienteInputDTO:
     faz_uso_medicamento: str
     nome_irmaos: str | None = None
     diagnostico: str | None = None
-    data_inicio_nipwin: date | None = None
+    data_inicio: date | None = None
     consentimento_lgpd_assinado_em: datetime | None = None
+    informacoes_nascimento: str | None = None
+    queixa_principal: str | None = None
+    observacoes: str | None = None
 
 
 @dataclass
@@ -45,9 +48,13 @@ class PacienteDTO:
     status: str
     nome_irmaos: str | None
     diagnostico: str | None
-    data_inicio_nipwin: date | None
+    data_inicio: date | None
     faz_uso_medicamento: str
     consentimento_lgpd_assinado_em: datetime | None
+    idade: int
+    informacoes_nascimento: str | None
+    queixa_principal: str | None
+    observacoes: str | None
     criado_em: datetime
     atualizado_em: datetime
 
@@ -64,9 +71,13 @@ def paciente_to_dto(paciente: Paciente) -> PacienteDTO:
         status=paciente.status.value,
         nome_irmaos=paciente.nome_irmaos,
         diagnostico=paciente.diagnostico,
-        data_inicio_nipwin=paciente.data_inicio_nipwin,
+        data_inicio=paciente.data_inicio,
         faz_uso_medicamento=paciente.faz_uso_medicamento,
         consentimento_lgpd_assinado_em=paciente.consentimento_lgpd_assinado_em,
+        idade=paciente.idade,
+        informacoes_nascimento=paciente.informacoes_nascimento,
+        queixa_principal=paciente.queixa_principal,
+        observacoes=paciente.observacoes,
         criado_em=paciente.criado_em,
         atualizado_em=paciente.atualizado_em,
     )

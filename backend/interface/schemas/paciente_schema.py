@@ -13,8 +13,11 @@ class PacienteCreate(BaseModel):
     faz_uso_medicamento: str
     nome_irmaos: str | None = None
     diagnostico: str | None = None
-    data_inicio_nipwin: date | None = None
+    data_inicio: date | None = None
     consentimento_lgpd_assinado_em: datetime | None = None
+    informacoes_nascimento: str | None = None
+    queixa_principal: str | None = None
+    observacoes: str | None = None
 
 
 class PacienteUpdate(PacienteCreate):
@@ -38,6 +41,8 @@ class PacienteResponseCadastral(BaseModel):
     status: str
     nome_irmaos: str | None
     consentimento_lgpd_assinado_em: datetime | None
+    idade: int
+    observacoes: str | None
     criado_em: datetime
     atualizado_em: datetime
 
@@ -46,5 +51,7 @@ class PacienteResponse(PacienteResponseCadastral):
     """Visao completa - admin/fono, inclui diagnostico e dados clinicos."""
 
     diagnostico: str | None
-    data_inicio_nipwin: date | None
+    data_inicio: date | None
     faz_uso_medicamento: str
+    informacoes_nascimento: str | None
+    queixa_principal: str | None

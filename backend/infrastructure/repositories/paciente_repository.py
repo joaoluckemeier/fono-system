@@ -26,8 +26,11 @@ def _to_entity(model: PacienteModel) -> Paciente:
         status=StatusPaciente(model.status),
         nome_irmaos=model.nome_irmaos,
         diagnostico=model.diagnostico,
-        data_inicio_nipwin=model.data_inicio_nipwin,
+        data_inicio=model.data_inicio,
         consentimento_lgpd_assinado_em=model.consentimento_lgpd_assinado_em,
+        informacoes_nascimento=model.informacoes_nascimento,
+        queixa_principal=model.queixa_principal,
+        observacoes=model.observacoes,
     )
 
 
@@ -50,8 +53,11 @@ class PacienteRepositoryImpl(PacienteRepository):
         model.status = entidade.status.value
         model.nome_irmaos = entidade.nome_irmaos
         model.diagnostico = entidade.diagnostico
-        model.data_inicio_nipwin = entidade.data_inicio_nipwin
+        model.data_inicio = entidade.data_inicio
         model.consentimento_lgpd_assinado_em = entidade.consentimento_lgpd_assinado_em
+        model.informacoes_nascimento = entidade.informacoes_nascimento
+        model.queixa_principal = entidade.queixa_principal
+        model.observacoes = entidade.observacoes
 
         await self._session.commit()
         await self._session.refresh(model)

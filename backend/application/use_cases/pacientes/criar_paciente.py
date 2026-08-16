@@ -35,8 +35,11 @@ class CriarPacienteUseCase:
             faz_uso_medicamento=dto.faz_uso_medicamento,
             nome_irmaos=dto.nome_irmaos,
             diagnostico=dto.diagnostico,
-            data_inicio_nipwin=dto.data_inicio_nipwin,
+            data_inicio=dto.data_inicio,
             consentimento_lgpd_assinado_em=dto.consentimento_lgpd_assinado_em,
+            informacoes_nascimento=dto.informacoes_nascimento,
+            queixa_principal=dto.queixa_principal,
+            observacoes=dto.observacoes,
         )
         salvo = await self._paciente_repository.salvar(paciente)
         return paciente_to_dto(salvo)

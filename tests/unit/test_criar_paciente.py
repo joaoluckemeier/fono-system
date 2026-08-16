@@ -18,6 +18,9 @@ def _dto() -> CriarPacienteInputDTO:
         tem_irmaos=False,
         faz_uso_medicamento="nao",
         diagnostico="TEA leve",
+        informacoes_nascimento="Parto normal, sem intercorrencias",
+        queixa_principal="Atraso de fala",
+        observacoes="Familia colaborativa",
     )
 
 
@@ -31,6 +34,29 @@ async def test_criar_paciente_valido_qualquer_papel(papel):
     assert paciente.nome_completo == "Joao Silva"
     assert paciente.clinica_id == clinica_id
     assert paciente.diagnostico == "TEA leve"
+    assert paciente.informacoes_nascimento == "Parto normal, sem intercorrencias"
+    assert paciente.queixa_principal == "Atraso de fala"
+    assert paciente.observacoes == "Familia colaborativa"
+
+
+async def test_idade_calculada_a_partir_da_data_nascimento():
+    hoje = date.today()
+    data_nascimento = date(hoje.year - 8, hoje.month, hoje.day)
+    idade_esperada = 8
+
+    dto = CriarPacienteInputDTO(
+        nome_completo="Joao Silva",
+        data_nascimento=data_nascimento,
+        nome_mae="Maria Silva",
+        nome_pai="Pedro Silva",
+        tem_irmaos=False,
+        faz_uso_medicamento="nao",
+    )
+    use_case = CriarPacienteUseCase(FakePacienteRepository())
+
+    paciente = await use_case.executar(dto, uuid4(), PapelUsuario.ADMIN)
+
+    assert paciente.idade == idade_esperada
 
 
 async def test_criar_paciente_persiste_no_repositorio():

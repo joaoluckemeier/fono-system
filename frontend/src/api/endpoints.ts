@@ -112,4 +112,5 @@ export const anexosApi = {
     return apiFetch<Anexo>("/anexos", { method: "POST", body: formData, isFormData: true });
   },
   deletar: (id: string) => apiFetch<void>(`/anexos/${id}`, { method: "DELETE" }),
+  obterUrl: (id: string) => apiFetch<{ url: string }>(`/anexos/${id}/url`),
 };

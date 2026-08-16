@@ -8,6 +8,7 @@ from functools import lru_cache
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.application.use_cases.anexos.buscar_url_anexo import BuscarUrlAnexoUseCase
 from backend.application.use_cases.anexos.criar_anexo import CriarAnexoUseCase
 from backend.application.use_cases.anexos.deletar_anexo import DeletarAnexoUseCase
 from backend.application.use_cases.anexos.listar_anexos import ListarAnexosUseCase
@@ -57,17 +58,27 @@ from backend.application.use_cases.protocolos.listar_protocolos import ListarPro
 from backend.application.use_cases.protocolos.listar_protocolos_paciente import (
     ListarProtocolosPacienteUseCase,
 )
+from backend.application.use_cases.termos.atualizar_modelo_termo import AtualizarModeloTermoUseCase
+from backend.application.use_cases.termos.criar_modelo_termo import CriarModeloTermoUseCase
+from backend.application.use_cases.termos.deletar_modelo_termo import DeletarModeloTermoUseCase
+from backend.application.use_cases.termos.gerar_termo import GerarTermoUseCase
+from backend.application.use_cases.termos.listar_modelos_termo import ListarModelosTermoUseCase
+from backend.application.use_cases.termos.listar_termos_gerados import ListarTermosGeradosUseCase
 from backend.config import Settings, get_settings
 from backend.domain.repositories.anexo_repository import AnexoRepository
 from backend.domain.repositories.caa_dados_repository import CaaDadosRepository
+from backend.domain.repositories.clinica_repository import ClinicaRepository
 from backend.domain.repositories.evolucao_repository import EvolucaoRepository
+from backend.domain.repositories.modelo_termo_repository import ModeloTermoRepository
 from backend.domain.repositories.paciente_repository import PacienteRepository
 from backend.domain.repositories.profissional_caso_repository import ProfissionalCasoRepository
 from backend.domain.repositories.protocolo_paciente_repository import ProtocoloPacienteRepository
 from backend.domain.repositories.protocolo_repository import ProtocoloRepository
 from backend.domain.repositories.refresh_token_repository import RefreshTokenRepository
+from backend.domain.repositories.termo_gerado_repository import TermoGeradoRepository
 from backend.domain.repositories.usuario_repository import UsuarioRepository
 from backend.domain.services.ai_gateway_service import AIGatewayInterface
+from backend.domain.services.gerador_documento_service import GeradorDocumentoInterface
 from backend.domain.services.storage_service import StorageServiceInterface
 from backend.domain.services.transcricao_service import TranscricaoServiceInterface
 from backend.infrastructure.ai.ai_gateway_placeholder import (
@@ -79,10 +90,13 @@ from backend.infrastructure.ai.openai_transcricao_service import OpenAITranscric
 from backend.infrastructure.audit.audit_logger import AuditLogger
 from backend.infrastructure.auth.jwt_provider import JWTProvider
 from backend.infrastructure.database.connection import async_session_factory
+from backend.infrastructure.documentos.fpdf_gerador_documento import FPDFGeradorDocumento
 from backend.infrastructure.repositories.anexo_repository import AnexoRepositoryImpl
 from backend.infrastructure.repositories.caa_dados_repository import CaaDadosRepositoryImpl
+from backend.infrastructure.repositories.clinica_repository import ClinicaRepositoryImpl
 from backend.infrastructure.repositories.evolucao_repository import EvolucaoRepositoryImpl
 from backend.infrastructure.repositories.log_acesso_repository import LogAcessoRepositoryImpl
+from backend.infrastructure.repositories.modelo_termo_repository import ModeloTermoRepositoryImpl
 from backend.infrastructure.repositories.paciente_repository import PacienteRepositoryImpl
 from backend.infrastructure.repositories.profissional_caso_repository import (
     ProfissionalCasoRepositoryImpl,
@@ -92,6 +106,7 @@ from backend.infrastructure.repositories.protocolo_paciente_repository import (
 )
 from backend.infrastructure.repositories.protocolo_repository import ProtocoloRepositoryImpl
 from backend.infrastructure.repositories.refresh_token_repository import RefreshTokenRepositoryImpl
+from backend.infrastructure.repositories.termo_gerado_repository import TermoGeradoRepositoryImpl
 from backend.infrastructure.repositories.usuario_repository import UsuarioRepositoryImpl
 from backend.infrastructure.storage.minio_storage import MinIOStorageService
 
@@ -125,6 +140,11 @@ def get_transcricao_service() -> TranscricaoServiceInterface:
     if settings.ai_gateway_modo == "openai" and settings.openai_api_key:
         return OpenAITranscricaoService(settings)
     return TranscricaoServicePlaceholder()
+
+
+@lru_cache
+def get_gerador_documento_service() -> GeradorDocumentoInterface:
+    return FPDFGeradorDocumento()
 
 
 def get_app_settings() -> Settings:
@@ -178,6 +198,22 @@ def get_evolucao_repository(session: AsyncSession = Depends(get_session)) -> Evo
 
 def get_anexo_repository(session: AsyncSession = Depends(get_session)) -> AnexoRepository:
     return AnexoRepositoryImpl(session)
+
+
+def get_clinica_repository(session: AsyncSession = Depends(get_session)) -> ClinicaRepository:
+    return ClinicaRepositoryImpl(session)
+
+
+def get_modelo_termo_repository(
+    session: AsyncSession = Depends(get_session),
+) -> ModeloTermoRepository:
+    return ModeloTermoRepositoryImpl(session)
+
+
+def get_termo_gerado_repository(
+    session: AsyncSession = Depends(get_session),
+) -> TermoGeradoRepository:
+    return TermoGeradoRepositoryImpl(session)
 
 
 # --- Auth use cases ---
@@ -414,3 +450,63 @@ def get_deletar_anexo_use_case(
     storage_service: StorageServiceInterface = Depends(get_storage_service),
 ) -> DeletarAnexoUseCase:
     return DeletarAnexoUseCase(anexo_repository, storage_service)
+
+
+def get_buscar_url_anexo_use_case(
+    anexo_repository: AnexoRepository = Depends(get_anexo_repository),
+    storage_service: StorageServiceInterface = Depends(get_storage_service),
+) -> BuscarUrlAnexoUseCase:
+    return BuscarUrlAnexoUseCase(anexo_repository, storage_service)
+
+
+# --- Termos e encaminhamentos use cases ---
+
+
+def get_criar_modelo_termo_use_case(
+    modelo_termo_repository: ModeloTermoRepository = Depends(get_modelo_termo_repository),
+) -> CriarModeloTermoUseCase:
+    return CriarModeloTermoUseCase(modelo_termo_repository)
+
+
+def get_listar_modelos_termo_use_case(
+    modelo_termo_repository: ModeloTermoRepository = Depends(get_modelo_termo_repository),
+) -> ListarModelosTermoUseCase:
+    return ListarModelosTermoUseCase(modelo_termo_repository)
+
+
+def get_atualizar_modelo_termo_use_case(
+    modelo_termo_repository: ModeloTermoRepository = Depends(get_modelo_termo_repository),
+) -> AtualizarModeloTermoUseCase:
+    return AtualizarModeloTermoUseCase(modelo_termo_repository)
+
+
+def get_deletar_modelo_termo_use_case(
+    modelo_termo_repository: ModeloTermoRepository = Depends(get_modelo_termo_repository),
+) -> DeletarModeloTermoUseCase:
+    return DeletarModeloTermoUseCase(modelo_termo_repository)
+
+
+def get_gerar_termo_use_case(
+    modelo_termo_repository: ModeloTermoRepository = Depends(get_modelo_termo_repository),
+    paciente_repository: PacienteRepository = Depends(get_paciente_repository),
+    clinica_repository: ClinicaRepository = Depends(get_clinica_repository),
+    termo_gerado_repository: TermoGeradoRepository = Depends(get_termo_gerado_repository),
+    anexo_repository: AnexoRepository = Depends(get_anexo_repository),
+    storage_service: StorageServiceInterface = Depends(get_storage_service),
+    gerador_documento: GeradorDocumentoInterface = Depends(get_gerador_documento_service),
+) -> GerarTermoUseCase:
+    return GerarTermoUseCase(
+        modelo_termo_repository,
+        paciente_repository,
+        clinica_repository,
+        termo_gerado_repository,
+        anexo_repository,
+        storage_service,
+        gerador_documento,
+    )
+
+
+def get_listar_termos_gerados_use_case(
+    termo_gerado_repository: TermoGeradoRepository = Depends(get_termo_gerado_repository),
+) -> ListarTermosGeradosUseCase:
+    return ListarTermosGeradosUseCase(termo_gerado_repository)

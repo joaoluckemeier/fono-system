@@ -15,3 +15,7 @@ class AnexoResponse(BaseModel):
     criado_por: UUID
     criado_em: datetime
     atualizado_em: datetime
+
+
+class AnexoUrlResponse(BaseModel):
+    url: str

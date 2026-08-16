@@ -33,8 +33,11 @@ class AtualizarPacienteUseCase:
         paciente.faz_uso_medicamento = dto.faz_uso_medicamento
         paciente.nome_irmaos = dto.nome_irmaos
         paciente.diagnostico = dto.diagnostico
-        paciente.data_inicio_nipwin = dto.data_inicio_nipwin
+        paciente.data_inicio = dto.data_inicio
         paciente.consentimento_lgpd_assinado_em = dto.consentimento_lgpd_assinado_em
+        paciente.informacoes_nascimento = dto.informacoes_nascimento
+        paciente.queixa_principal = dto.queixa_principal
+        paciente.observacoes = dto.observacoes
 
         salvo = await self._paciente_repository.salvar(paciente)
         return paciente_to_dto(salvo)

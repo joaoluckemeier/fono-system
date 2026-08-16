@@ -12,9 +12,11 @@ from backend.interface.routers.anexos_router import router as anexos_router
 from backend.interface.routers.auth_router import router as auth_router
 from backend.interface.routers.caa_router import router as caa_router
 from backend.interface.routers.evolucoes_router import router as evolucoes_router
+from backend.interface.routers.modelos_termo_router import router as modelos_termo_router
 from backend.interface.routers.pacientes_router import router as pacientes_router
 from backend.interface.routers.profissionais_router import router as profissionais_router
 from backend.interface.routers.protocolos_router import router as protocolos_router
+from backend.interface.routers.termos_router import router as termos_router
 
 settings = get_settings()
 configurar_logging(settings.environment)
@@ -42,6 +44,8 @@ app.include_router(protocolos_router)
 app.include_router(caa_router)
 app.include_router(evolucoes_router)
 app.include_router(anexos_router)
+app.include_router(modelos_termo_router)
+app.include_router(termos_router)
 
 
 @app.get("/health")

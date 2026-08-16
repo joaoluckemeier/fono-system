@@ -26,6 +26,18 @@ def test_secretaria_nao_acessa_evolucao_na_politica():
     assert usuario_pode(PapelUsuario.FONO, Recurso.EVOLUCAO) is True
 
 
+def test_apenas_admin_gerencia_modelos_de_termo():
+    assert usuario_pode(PapelUsuario.ADMIN, Recurso.TERMO_MODELO) is True
+    assert usuario_pode(PapelUsuario.FONO, Recurso.TERMO_MODELO) is False
+    assert usuario_pode(PapelUsuario.SECRETARIA, Recurso.TERMO_MODELO) is False
+
+
+def test_admin_e_fono_geram_termo():
+    assert usuario_pode(PapelUsuario.ADMIN, Recurso.TERMO_GERACAO) is True
+    assert usuario_pode(PapelUsuario.FONO, Recurso.TERMO_GERACAO) is True
+    assert usuario_pode(PapelUsuario.SECRETARIA, Recurso.TERMO_GERACAO) is False
+
+
 async def _paciente_para_teste(paciente_repository: FakePacienteRepository, clinica_id):
     return await CriarPacienteUseCase(paciente_repository).executar(
         CriarPacienteInputDTO(

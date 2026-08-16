@@ -27,12 +27,16 @@ export interface Paciente {
   status: StatusPaciente;
   nome_irmaos: string | null;
   consentimento_lgpd_assinado_em: string | null;
+  idade: number;
+  observacoes: string | null;
   criado_em: string;
   atualizado_em: string;
   // presentes so quando o papel tem acesso clinico (admin/fono)
   diagnostico?: string | null;
-  data_inicio_nipwin?: string | null;
+  data_inicio?: string | null;
   faz_uso_medicamento?: string;
+  informacoes_nascimento?: string | null;
+  queixa_principal?: string | null;
 }
 
 export interface PacienteInput {
@@ -44,8 +48,11 @@ export interface PacienteInput {
   faz_uso_medicamento: string;
   nome_irmaos?: string | null;
   diagnostico?: string | null;
-  data_inicio_nipwin?: string | null;
+  data_inicio?: string | null;
   consentimento_lgpd_assinado_em?: string | null;
+  informacoes_nascimento?: string | null;
+  queixa_principal?: string | null;
+  observacoes?: string | null;
 }
 
 export const ESPECIALIDADES = [

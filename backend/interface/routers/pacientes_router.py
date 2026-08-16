@@ -51,6 +51,8 @@ _CAMPOS_CADASTRAIS = (
     "status",
     "nome_irmaos",
     "consentimento_lgpd_assinado_em",
+    "idade",
+    "observacoes",
     "criado_em",
     "atualizado_em",
 )
@@ -62,8 +64,10 @@ def _serializar(dto: PacienteDTO, papel: str) -> PacienteResponse | PacienteResp
         return PacienteResponse(
             **cadastrais,
             diagnostico=dto.diagnostico,
-            data_inicio_nipwin=dto.data_inicio_nipwin,
+            data_inicio=dto.data_inicio,
             faz_uso_medicamento=dto.faz_uso_medicamento,
+            informacoes_nascimento=dto.informacoes_nascimento,
+            queixa_principal=dto.queixa_principal,
         )
     return PacienteResponseCadastral(**cadastrais)
 

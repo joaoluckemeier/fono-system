@@ -55,6 +55,8 @@ espalhado em `if` soltos dentro de cada endpoint.
 | Criar/editar evolução clínica | ✅ | ✅ | ❌ |
 | Ver evoluções | ✅ | ✅ | ❌ |
 | Anexar arquivo | ✅ | ✅ | ✅ (não-clínico) |
+| Gerenciar modelos de termo/encaminhamento | ✅ | ❌ | ❌ |
+| Gerar termo/encaminhamento para um paciente | ✅ | ✅ | ❌ |
 | Gerenciar usuários da clínica | ✅ | ❌ | ❌ |
 | Ver logs de auditoria | ✅ | ❌ | ❌ |
 

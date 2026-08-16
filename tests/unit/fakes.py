@@ -3,15 +3,24 @@
 from datetime import datetime
 from uuid import UUID
 
+from backend.domain.entities.anexo import Anexo, EntidadeAnexavel
+from backend.domain.entities.clinica import Clinica
 from backend.domain.entities.evolucao import Evolucao, StatusEvolucao
+from backend.domain.entities.modelo_termo import ModeloTermo
 from backend.domain.entities.paciente import Paciente
 from backend.domain.entities.refresh_token import RefreshToken
+from backend.domain.entities.termo_gerado import TermoGerado
 from backend.domain.entities.usuario import Usuario
+from backend.domain.repositories.anexo_repository import AnexoRepository
+from backend.domain.repositories.clinica_repository import ClinicaRepository
 from backend.domain.repositories.evolucao_repository import EvolucaoRepository
+from backend.domain.repositories.modelo_termo_repository import ModeloTermoRepository
 from backend.domain.repositories.paciente_repository import PacienteRepository
 from backend.domain.repositories.refresh_token_repository import RefreshTokenRepository
+from backend.domain.repositories.termo_gerado_repository import TermoGeradoRepository
 from backend.domain.repositories.usuario_repository import UsuarioRepository
 from backend.domain.services.ai_gateway_service import AIGatewayInterface
+from backend.domain.services.gerador_documento_service import GeradorDocumentoInterface
 from backend.domain.services.storage_service import StorageServiceInterface
 from backend.domain.services.transcricao_service import TranscricaoServiceInterface
 
@@ -151,6 +160,123 @@ class FakeEvolucaoRepository(EvolucaoRepository):
             if e.status is StatusEvolucao.CONFIRMADA
         ]
         return registros[0] if registros else None
+
+
+class FakeAnexoRepository(AnexoRepository):
+    def __init__(self, anexos: list[Anexo] | None = None) -> None:
+        self._anexos: dict[UUID, Anexo] = {a.id: a for a in (anexos or [])}
+
+    async def salvar(self, entidade: Anexo) -> Anexo:
+        self._anexos[entidade.id] = entidade
+        return entidade
+
+    async def buscar_por_id(self, id: UUID, clinica_id: UUID) -> Anexo | None:
+        anexo = self._anexos.get(id)
+        if anexo is None or anexo.clinica_id != clinica_id or anexo.deletado:
+            return None
+        return anexo
+
+    async def listar(self, clinica_id: UUID) -> list[Anexo]:
+        return [a for a in self._anexos.values() if a.clinica_id == clinica_id and not a.deletado]
+
+    async def soft_delete(self, id: UUID, clinica_id: UUID) -> None:
+        anexo = self._anexos.get(id)
+        if anexo is not None and anexo.clinica_id == clinica_id:
+            anexo.deletado = True
+            anexo.deletado_em = datetime.now()
+
+    async def listar_por_entidade(
+        self, entidade_tipo: EntidadeAnexavel, entidade_id: UUID, clinica_id: UUID
+    ) -> list[Anexo]:
+        return [
+            a
+            for a in self._anexos.values()
+            if a.entidade_tipo == entidade_tipo
+            and a.entidade_id == entidade_id
+            and a.clinica_id == clinica_id
+            and not a.deletado
+        ]
+
+
+class FakeClinicaRepository(ClinicaRepository):
+    def __init__(self, clinicas: list[Clinica] | None = None) -> None:
+        self._clinicas: dict[UUID, Clinica] = {c.id: c for c in (clinicas or [])}
+
+    async def salvar(self, clinica: Clinica) -> Clinica:
+        self._clinicas[clinica.id] = clinica
+        return clinica
+
+    async def buscar_por_id(self, id: UUID) -> Clinica | None:
+        return self._clinicas.get(id)
+
+    async def listar(self) -> list[Clinica]:
+        return list(self._clinicas.values())
+
+
+class FakeModeloTermoRepository(ModeloTermoRepository):
+    def __init__(self, modelos: list[ModeloTermo] | None = None) -> None:
+        self._modelos: dict[UUID, ModeloTermo] = {m.id: m for m in (modelos or [])}
+
+    async def salvar(self, entidade: ModeloTermo) -> ModeloTermo:
+        self._modelos[entidade.id] = entidade
+        return entidade
+
+    async def buscar_por_id(self, id: UUID, clinica_id: UUID) -> ModeloTermo | None:
+        modelo = self._modelos.get(id)
+        if modelo is None or modelo.clinica_id != clinica_id or modelo.deletado:
+            return None
+        return modelo
+
+    async def listar(self, clinica_id: UUID) -> list[ModeloTermo]:
+        return [
+            m for m in self._modelos.values() if m.clinica_id == clinica_id and not m.deletado
+        ]
+
+    async def soft_delete(self, id: UUID, clinica_id: UUID) -> None:
+        modelo = self._modelos.get(id)
+        if modelo is not None and modelo.clinica_id == clinica_id:
+            modelo.deletado = True
+            modelo.deletado_em = datetime.now()
+
+
+class FakeTermoGeradoRepository(TermoGeradoRepository):
+    def __init__(self) -> None:
+        self._termos: dict[UUID, TermoGerado] = {}
+
+    async def salvar(self, entidade: TermoGerado) -> TermoGerado:
+        self._termos[entidade.id] = entidade
+        return entidade
+
+    async def buscar_por_id(self, id: UUID, clinica_id: UUID) -> TermoGerado | None:
+        termo = self._termos.get(id)
+        if termo is None or termo.clinica_id != clinica_id or termo.deletado:
+            return None
+        return termo
+
+    async def listar(self, clinica_id: UUID) -> list[TermoGerado]:
+        return [t for t in self._termos.values() if t.clinica_id == clinica_id and not t.deletado]
+
+    async def soft_delete(self, id: UUID, clinica_id: UUID) -> None:
+        termo = self._termos.get(id)
+        if termo is not None and termo.clinica_id == clinica_id:
+            termo.deletado = True
+            termo.deletado_em = datetime.now()
+
+    async def listar_por_paciente(self, paciente_id: UUID, clinica_id: UUID) -> list[TermoGerado]:
+        return [
+            t
+            for t in self._termos.values()
+            if t.paciente_id == paciente_id and t.clinica_id == clinica_id and not t.deletado
+        ]
+
+
+class FakeGeradorDocumento(GeradorDocumentoInterface):
+    def __init__(self) -> None:
+        self.chamadas: list[tuple[str, str]] = []
+
+    async def gerar_pdf(self, titulo: str, corpo_texto: str) -> bytes:
+        self.chamadas.append((titulo, corpo_texto))
+        return b"%PDF-FAKE"
 
 
 class FakeStorageService(StorageServiceInterface):

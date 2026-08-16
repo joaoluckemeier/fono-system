@@ -19,8 +19,11 @@ class PacienteModel(Base, TenantMixin):
     )
     nome_irmaos: Mapped[str | None] = mapped_column(Text, nullable=True)
     diagnostico: Mapped[str | None] = mapped_column(Text, nullable=True)
-    data_inicio_nipwin: Mapped[date | None] = mapped_column(Date, nullable=True)
+    data_inicio: Mapped[date | None] = mapped_column(Date, nullable=True)
     faz_uso_medicamento: Mapped[str] = mapped_column(Text, nullable=False)
     consentimento_lgpd_assinado_em: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    informacoes_nascimento: Mapped[str | None] = mapped_column(Text, nullable=True)
+    queixa_principal: Mapped[str | None] = mapped_column(Text, nullable=True)
+    observacoes: Mapped[str | None] = mapped_column(Text, nullable=True)

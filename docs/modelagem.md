@@ -75,9 +75,15 @@ protocolos, CAA e anexos se ligam diretamente ao paciente.
 | tem_irmaos | BOOLEAN | |
 | nome_irmaos | TEXT | nullable |
 | diagnostico | TEXT | texto livre na v1 — ver decisão abaixo |
-| data_inicio_nipwin | DATE | |
+| data_inicio | DATE | |
 | faz_uso_medicamento | TEXT | |
 | consentimento_lgpd_assinado_em | TIMESTAMP | nullable — rastreabilidade, não substitui o documento jurídico |
+| informacoes_nascimento | TEXT | nullable — texto livre |
+| queixa_principal | TEXT | nullable — queixa principal da família |
+| observacoes | TEXT | nullable — campo aberto |
+
+> `idade` não é uma coluna — é calculada em tempo de leitura a partir de `data_nascimento`
+> (`Paciente.idade` em `domain/entities/paciente.py`), para nunca dessincronizar do dado real.
 
 ---
 
@@ -174,6 +180,37 @@ schema. O banco guarda apenas `storage_ref`, resolvido pelo `StorageService`.
 
 ---
 
+### modelos_termo
+Catálogo de modelos de termo/encaminhamento pré-cadastrados pela clínica, com
+placeholders (`{{nome_paciente}}`, `{{idade}}`, etc.) mesclados na hora da geração.
+
+| Campo | Tipo | Obs |
+|---|---|---|
+| id | UUID | PK |
+| clinica_id | UUID | FK → clinicas |
+| nome | VARCHAR | |
+| tipo | VARCHAR | 'termo', 'encaminhamento' |
+| corpo_texto | TEXT | com placeholders |
+| ativo | BOOLEAN | default true — desativado some da seleção mas não é soft delete |
+
+---
+
+### termos_gerados
+Log de rastreabilidade de cada termo/encaminhamento efetivamente gerado para um
+paciente — liga o modelo usado ao PDF salvo em `anexos`. `criado_em` (herdado)
+já é a data de geração, não há coluna separada para isso.
+
+| Campo | Tipo | Obs |
+|---|---|---|
+| id | UUID | PK |
+| clinica_id | UUID | FK → clinicas |
+| paciente_id | UUID | FK → pacientes |
+| modelo_id | UUID | FK → modelos_termo |
+| anexo_id | UUID | FK → anexos, o PDF gerado |
+| gerado_por | UUID | FK → usuarios |
+
+---
+
 ### logs_acesso
 Auditoria — não só escrita, também **leitura** de dado clínico sensível.
 
@@ -215,7 +252,11 @@ clinicas
   │     ├── caa_dados (paciente_id, 1:1)
   │     ├── evolucoes (paciente_id)
   │     │     └── usuarios (usuario_id, quem registrou)
-  │     └── anexos (entidade_id → paciente | evolucao | protocolo_paciente)
+  │     ├── anexos (entidade_id → paciente | evolucao | protocolo_paciente)
+  │     └── termos_gerados (paciente_id)
+  │           ├── modelos_termo (modelo_id, catálogo por clínica)
+  │           └── anexos (anexo_id, o PDF gerado)
+  ├── modelos_termo (clinica_id)
   ├── logs_acesso (clinica_id)
   └── usuarios
         └── refresh_tokens (usuario_id)

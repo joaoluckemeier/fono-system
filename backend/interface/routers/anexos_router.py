@@ -5,10 +5,12 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from backend.application.dtos.anexo_dto import CriarAnexoInputDTO
 from backend.application.dtos.auth_dto import UsuarioAutenticadoDTO
 from backend.application.exceptions import PermissaoNegadaError, RecursoNaoEncontradoError
+from backend.application.use_cases.anexos.buscar_url_anexo import BuscarUrlAnexoUseCase
 from backend.application.use_cases.anexos.criar_anexo import CriarAnexoUseCase
 from backend.application.use_cases.anexos.deletar_anexo import DeletarAnexoUseCase
 from backend.application.use_cases.anexos.listar_anexos import ListarAnexosUseCase
 from backend.container import (
+    get_buscar_url_anexo_use_case,
     get_criar_anexo_use_case,
     get_deletar_anexo_use_case,
     get_listar_anexos_use_case,
@@ -17,7 +19,7 @@ from backend.domain.entities.anexo import EntidadeAnexavel
 from backend.domain.entities.log_acesso import AcaoAuditoria
 from backend.domain.entities.usuario import PapelUsuario
 from backend.interface.dependencies import get_usuario_atual
-from backend.interface.schemas.anexo_schema import AnexoResponse
+from backend.interface.schemas.anexo_schema import AnexoResponse, AnexoUrlResponse
 
 router = APIRouter(prefix="/anexos", tags=["anexos"])
 
@@ -89,6 +91,30 @@ async def criar_anexo(
             "entidade_id": anexo.id,
         }
     return AnexoResponse(**anexo.__dict__)
+
+
+@router.get("/{id}/url", response_model=AnexoUrlResponse)
+async def obter_url_anexo(
+    id: UUID,
+    request: Request,
+    usuario_atual: UsuarioAutenticadoDTO = Depends(get_usuario_atual),
+    use_case: BuscarUrlAnexoUseCase = Depends(get_buscar_url_anexo_use_case),
+) -> AnexoUrlResponse:
+    try:
+        url = await use_case.executar(
+            id, usuario_atual.clinica_id, PapelUsuario(usuario_atual.papel)
+        )
+    except PermissaoNegadaError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except RecursoNaoEncontradoError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    request.state.auditoria = {
+        "acao": AcaoAuditoria.VISUALIZAR,
+        "entidade_tipo": "anexo",
+        "entidade_id": id,
+    }
+    return AnexoUrlResponse(url=url)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)

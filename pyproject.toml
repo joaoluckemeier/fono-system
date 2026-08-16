@@ -21,6 +21,7 @@ dependencies = [
     "structlog==24.4.0",
     "prometheus-client==0.21.0",
     "openai>=2.46.0",
+    "fpdf2==2.8.1",
 ]
 
 [dependency-groups]

@@ -31,6 +31,9 @@ def _novo_paciente(clinica_id) -> Paciente:
         tem_irmaos=False,
         faz_uso_medicamento="nao",
         diagnostico="TEA leve",
+        informacoes_nascimento="Parto normal, sem intercorrencias",
+        queixa_principal="Atraso de fala",
+        observacoes="Familia colaborativa",
     )
 
 
@@ -45,6 +48,9 @@ async def test_criar_e_buscar_paciente(db_session):
     assert encontrado is not None
     assert encontrado.nome_completo == "Joao Silva"
     assert encontrado.diagnostico == "TEA leve"
+    assert encontrado.informacoes_nascimento == "Parto normal, sem intercorrencias"
+    assert encontrado.queixa_principal == "Atraso de fala"
+    assert encontrado.observacoes == "Familia colaborativa"
 
 
 async def test_atualizar_paciente(db_session):
