@@ -1,16 +1,29 @@
 import asyncio
 import io
 import uuid
+from datetime import timedelta
 
 from minio import Minio
 
 from backend.config import Settings
 from backend.domain.services.storage_service import StorageServiceInterface
 
+_EXPIRACAO_URL_PRESIGNED = timedelta(minutes=15)
+_REGIAO_PADRAO_MINIO = "us-east-1"
+
 
 class MinIOStorageService(StorageServiceInterface):
     """O cliente oficial do MinIO e sincrono - as chamadas rodam em thread pool
-    (asyncio.to_thread) para nao bloquear o event loop do FastAPI."""
+    (asyncio.to_thread) para nao bloquear o event loop do FastAPI.
+
+    Usa dois clientes: um com o endpoint interno (rede Docker) para put/remove,
+    e outro com o endpoint publico para presign - o navegador precisa conseguir
+    resolver o host da URL assinada, o que o endpoint interno nao garante.
+
+    Regiao fixada em vez de deixar o client descobrir via GetBucketLocation:
+    evita uma chamada de rede extra a cada URL assinada (o client publico
+    bateria no proprio dominio publico so pra perguntar a regiao do bucket).
+    """
 
     def __init__(self, settings: Settings) -> None:
         self._bucket = settings.minio_bucket
@@ -19,6 +32,20 @@ class MinIOStorageService(StorageServiceInterface):
             access_key=settings.minio_access_key,
             secret_key=settings.minio_secret_key,
             secure=settings.minio_secure,
+            region=_REGIAO_PADRAO_MINIO,
+        )
+        endpoint_publico = settings.minio_public_endpoint or settings.minio_endpoint
+        secure_publico = (
+            settings.minio_public_secure
+            if settings.minio_public_endpoint
+            else settings.minio_secure
+        )
+        self._client_presign = Minio(
+            endpoint_publico,
+            access_key=settings.minio_access_key,
+            secret_key=settings.minio_secret_key,
+            secure=secure_publico,
+            region=_REGIAO_PADRAO_MINIO,
         )
         if not self._client.bucket_exists(self._bucket):
             self._client.make_bucket(self._bucket)
@@ -32,7 +59,12 @@ class MinIOStorageService(StorageServiceInterface):
 
     async def obter_url(self, storage_ref: str) -> str:
         key = storage_ref.removeprefix(f"minio://{self._bucket}/")
-        return await asyncio.to_thread(self._client.presigned_get_object, self._bucket, key)
+        return await asyncio.to_thread(
+            self._client_presign.presigned_get_object,
+            self._bucket,
+            key,
+            expires=_EXPIRACAO_URL_PRESIGNED,
+        )
 
     async def deletar(self, storage_ref: str) -> None:
         key = storage_ref.removeprefix(f"minio://{self._bucket}/")

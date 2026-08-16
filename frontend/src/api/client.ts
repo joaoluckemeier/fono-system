@@ -41,10 +41,22 @@ async function tentarRenovarToken(): Promise<boolean> {
   return refreshEmAndamento;
 }
 
+function paraMensagemLegivel(valor: unknown, status: number): string {
+  if (typeof valor === "string") return valor;
+  if (Array.isArray(valor)) {
+    // Erro de validacao do FastAPI/Pydantic: lista de { msg, loc, ... }.
+    const mensagens = valor
+      .map((item) => (item && typeof item === "object" && "msg" in item ? String(item.msg) : null))
+      .filter((m): m is string => m !== null);
+    if (mensagens.length > 0) return mensagens.join("; ");
+  }
+  return `Erro ${status}`;
+}
+
 async function extrairMensagemDeErro(response: Response): Promise<string> {
   try {
     const data = await response.json();
-    return data.detail ?? data.error ?? `Erro ${response.status}`;
+    return paraMensagemLegivel(data.detail ?? data.error, response.status);
   } catch {
     return `Erro ${response.status}`;
   }
@@ -56,7 +68,7 @@ interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   semAutenticacao?: boolean;
 }
 
-export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+async function fetchComAuth(path: string, options: ApiFetchOptions): Promise<Response> {
   const { body, isFormData, semAutenticacao, headers, ...rest } = options;
 
   const montarHeaders = (): HeadersInit => {
@@ -98,6 +110,16 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     throw new ApiError(response.status, await extrairMensagemDeErro(response));
   }
 
+  return response;
+}
+
+export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
+  const response = await fetchComAuth(path, options);
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+export async function apiFetchBlob(path: string, options: ApiFetchOptions = {}): Promise<Blob> {
+  const response = await fetchComAuth(path, options);
+  return response.blob();
 }

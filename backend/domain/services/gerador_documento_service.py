@@ -5,4 +5,11 @@ class GeradorDocumentoInterface(ABC):
     """O dominio nao sabe qual biblioteca gera o PDF - so chama a interface."""
 
     @abstractmethod
-    async def gerar_pdf(self, titulo: str, corpo_texto: str) -> bytes: ...
+    async def gerar_pdf(
+        self,
+        titulo: str,
+        corpo_texto: str,
+        nome_paciente: str,
+        nome_profissional: str,
+        data_atual: str,
+    ) -> bytes: ...

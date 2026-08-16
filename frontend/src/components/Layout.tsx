@@ -48,10 +48,27 @@ function IconeProtocolos() {
   );
 }
 
+function IconeTermos() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M7 3h7l4 4v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+      <path d="M14 3v4h4" />
+      <path d="M8 13h8M8 17h5" />
+    </svg>
+  );
+}
+
 const navItems = [
-  { to: "/", label: "Dashboard", icon: IconeDashboard, end: true },
-  { to: "/pacientes", label: "Pacientes", icon: IconePacientes, end: false },
-  { to: "/protocolos", label: "Protocolos", icon: IconeProtocolos, end: false },
+  { to: "/", label: "Dashboard", icon: IconeDashboard, end: true, papeis: null },
+  { to: "/pacientes", label: "Pacientes", icon: IconePacientes, end: false, papeis: null },
+  { to: "/protocolos", label: "Protocolos", icon: IconeProtocolos, end: false, papeis: null },
+  {
+    to: "/modelos-termo",
+    label: "Termos",
+    icon: IconeTermos,
+    end: false,
+    papeis: ["admin", "fono"] as const,
+  },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -74,7 +91,9 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
+          {navItems
+            .filter((item) => !item.papeis || (usuario && item.papeis.includes(usuario.papel)))
+            .map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}

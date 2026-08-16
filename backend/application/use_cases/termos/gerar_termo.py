@@ -84,7 +84,13 @@ class GerarTermoUseCase:
             "data_atual": date.today().isoformat(),
         }
         corpo_mesclado = _mesclar_placeholders(modelo.corpo_texto, contexto)
-        pdf_bytes = await self._gerador_documento.gerar_pdf(modelo.nome, corpo_mesclado)
+        pdf_bytes = await self._gerador_documento.gerar_pdf(
+            modelo.nome,
+            corpo_mesclado,
+            nome_paciente=paciente.nome_completo,
+            nome_profissional=usuario_nome,
+            data_atual=contexto["data_atual"],
+        )
 
         nome_arquivo = f"{modelo.nome}.pdf"
         storage_ref = await self._storage_service.salvar(pdf_bytes, nome_arquivo)

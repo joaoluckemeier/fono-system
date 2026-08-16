@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     minio_secret_key: str
     minio_bucket: str
     minio_secure: bool = False
+    minio_public_endpoint: str = ""
+    minio_public_secure: bool = False
 
     redis_url: str
 

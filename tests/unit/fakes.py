@@ -274,7 +274,14 @@ class FakeGeradorDocumento(GeradorDocumentoInterface):
     def __init__(self) -> None:
         self.chamadas: list[tuple[str, str]] = []
 
-    async def gerar_pdf(self, titulo: str, corpo_texto: str) -> bytes:
+    async def gerar_pdf(
+        self,
+        titulo: str,
+        corpo_texto: str,
+        nome_paciente: str,
+        nome_profissional: str,
+        data_atual: str,
+    ) -> bytes:
         self.chamadas.append((titulo, corpo_texto))
         return b"%PDF-FAKE"
 

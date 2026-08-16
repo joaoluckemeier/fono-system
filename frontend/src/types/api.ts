@@ -172,3 +172,42 @@ export interface Anexo {
   criado_em: string;
   atualizado_em: string;
 }
+
+export type TipoModeloTermo = "termo" | "encaminhamento";
+
+export const LABEL_TIPO_MODELO_TERMO: Record<TipoModeloTermo, string> = {
+  termo: "Termo",
+  encaminhamento: "Encaminhamento",
+};
+
+export interface ModeloTermo {
+  id: string;
+  clinica_id: string;
+  nome: string;
+  tipo: TipoModeloTermo;
+  corpo_texto: string;
+  ativo: boolean;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface ModeloTermoInput {
+  nome: string;
+  tipo: TipoModeloTermo;
+  corpo_texto: string;
+}
+
+export interface ModeloTermoUpdateInput extends ModeloTermoInput {
+  ativo: boolean;
+}
+
+export interface TermoGerado {
+  id: string;
+  clinica_id: string;
+  paciente_id: string;
+  modelo_id: string;
+  anexo_id: string;
+  gerado_por: string;
+  criado_em: string;
+  atualizado_em: string;
+}

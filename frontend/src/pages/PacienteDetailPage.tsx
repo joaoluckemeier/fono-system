@@ -11,6 +11,7 @@ import { ProfissionaisSection } from "./paciente/ProfissionaisSection";
 import { ProtocolosSection } from "./paciente/ProtocolosSection";
 import { CaaSection } from "./paciente/CaaSection";
 import { EvolucoesSection } from "./paciente/EvolucoesSection";
+import { TermosSection } from "./paciente/TermosSection";
 import { AnexosSection } from "./paciente/AnexosSection";
 import { FotoPerfil } from "./paciente/FotoPerfil";
 import { Button } from "@/components/ui/button";
@@ -145,6 +146,7 @@ export function PacienteDetailPage() {
         <>
           <CaaSection pacienteId={id} />
           <EvolucoesSection pacienteId={id} />
+          <TermosSection pacienteId={id} />
         </>
       )}
 

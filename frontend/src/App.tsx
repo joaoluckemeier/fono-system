@@ -10,6 +10,7 @@ import { PacientesKanbanPage } from "./pages/PacientesKanbanPage";
 import { PacienteFormPage } from "./pages/PacienteFormPage";
 import { PacienteDetailPage } from "./pages/PacienteDetailPage";
 import { ProtocolosPage } from "./pages/ProtocolosPage";
+import { ModelosTermoPage } from "./pages/ModelosTermoPage";
 import { Toaster } from "@/components/ui/sonner";
 
 function ComLayout({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/pacientes/:id/editar" element={<ComLayout><PacienteFormPage /></ComLayout>} />
 
             <Route path="/protocolos" element={<ComLayout><ProtocolosPage /></ComLayout>} />
+            <Route path="/modelos-termo" element={<ComLayout><ModelosTermoPage /></ComLayout>} />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

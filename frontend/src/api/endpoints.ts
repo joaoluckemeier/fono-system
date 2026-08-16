@@ -1,10 +1,13 @@
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchBlob } from "./client";
 import type {
   Anexo,
   CaaDados,
   CaaDadosInput,
   Evolucao,
   EvolucaoInput,
+  ModeloTermo,
+  ModeloTermoInput,
+  ModeloTermoUpdateInput,
   Paciente,
   PacienteInput,
   ProfissionalCaso,
@@ -15,6 +18,7 @@ import type {
   ProtocoloPacienteInput,
   StatusPaciente,
   StatusProtocoloPaciente,
+  TermoGerado,
   TokenPar,
   UsuarioAutenticado,
 } from "../types/api";
@@ -113,4 +117,23 @@ export const anexosApi = {
   },
   deletar: (id: string) => apiFetch<void>(`/anexos/${id}`, { method: "DELETE" }),
   obterUrl: (id: string) => apiFetch<{ url: string }>(`/anexos/${id}/url`),
+};
+
+export const modelosTermoApi = {
+  listar: (apenasAtivos?: boolean) =>
+    apiFetch<ModeloTermo[]>(`/modelos-termo${apenasAtivos ? "?apenas_ativos=true" : ""}`),
+  criar: (dados: ModeloTermoInput) =>
+    apiFetch<ModeloTermo>("/modelos-termo", { method: "POST", body: dados }),
+  atualizar: (id: string, dados: ModeloTermoUpdateInput) =>
+    apiFetch<ModeloTermo>(`/modelos-termo/${id}`, { method: "PUT", body: dados }),
+  deletar: (id: string) => apiFetch<void>(`/modelos-termo/${id}`, { method: "DELETE" }),
+};
+
+export const termosApi = {
+  listar: (pacienteId: string) => apiFetch<TermoGerado[]>(`/pacientes/${pacienteId}/termos`),
+  gerar: (pacienteId: string, modeloId: string) =>
+    apiFetchBlob(`/pacientes/${pacienteId}/termos`, {
+      method: "POST",
+      body: { modelo_id: modeloId },
+    }),
 };
