@@ -10,6 +10,7 @@ from backend.infrastructure.database.models.profissional_caso_model import Profi
 from backend.infrastructure.database.models.protocolo_model import ProtocoloModel
 from backend.infrastructure.database.models.protocolo_paciente_model import ProtocoloPacienteModel
 from backend.infrastructure.database.models.refresh_token_model import RefreshTokenModel
+from backend.infrastructure.database.models.tarefa_model import TarefaModel
 from backend.infrastructure.database.models.termo_gerado_model import TermoGeradoModel
 from backend.infrastructure.database.models.usuario_model import UsuarioModel
 
@@ -26,6 +27,7 @@ __all__ = [
     "ProtocoloModel",
     "ProtocoloPacienteModel",
     "RefreshTokenModel",
+    "TarefaModel",
     "TermoGeradoModel",
     "UsuarioModel",
 ]

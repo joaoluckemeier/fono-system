@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import type { Papel } from "../types/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,16 @@ function IconePacientes() {
   );
 }
 
+function IconePlanejamento() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="4" width="18" height="17" rx="2" />
+      <path d="M8 2v4M16 2v4M3 10h18" />
+      <path d="m8.5 15 2 2 4.5-4.5" />
+    </svg>
+  );
+}
+
 function IconeProtocolos() {
   return (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -61,13 +72,20 @@ function IconeTermos() {
 const navItems = [
   { to: "/", label: "Dashboard", icon: IconeDashboard, end: true, papeis: null },
   { to: "/pacientes", label: "Pacientes", icon: IconePacientes, end: false, papeis: null },
+  {
+    to: "/planejamento",
+    label: "Planejamento",
+    icon: IconePlanejamento,
+    end: false,
+    papeis: ["admin", "fono"] as Papel[],
+  },
   { to: "/protocolos", label: "Protocolos", icon: IconeProtocolos, end: false, papeis: null },
   {
     to: "/modelos-termo",
     label: "Termos",
     icon: IconeTermos,
     end: false,
-    papeis: ["admin", "fono"] as const,
+    papeis: ["admin", "fono"] as Papel[],
   },
 ];
 

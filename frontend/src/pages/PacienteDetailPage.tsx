@@ -11,12 +11,14 @@ import { ProfissionaisSection } from "./paciente/ProfissionaisSection";
 import { ProtocolosSection } from "./paciente/ProtocolosSection";
 import { CaaSection } from "./paciente/CaaSection";
 import { EvolucoesSection } from "./paciente/EvolucoesSection";
+import { TarefasSection } from "./paciente/TarefasSection";
 import { TermosSection } from "./paciente/TermosSection";
 import { AnexosSection } from "./paciente/AnexosSection";
 import { FotoPerfil } from "./paciente/FotoPerfil";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -109,48 +111,71 @@ export function PacienteDetailPage() {
         </div>
       </div>
 
-      <Card className="p-6">
-        <h2 className="mb-4 text-base font-semibold text-foreground">Dados cadastrais</h2>
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-5 gap-y-2.5 text-sm">
-          <dt className="font-medium text-muted-foreground">Data de nascimento</dt>
-          <dd>{paciente.data_nascimento} ({paciente.idade} anos)</dd>
-          <dt className="font-medium text-muted-foreground">Nome da mãe</dt>
-          <dd>{paciente.nome_mae}</dd>
-          <dt className="font-medium text-muted-foreground">Nome do pai</dt>
-          <dd>{paciente.nome_pai}</dd>
-          <dt className="font-medium text-muted-foreground">Tem irmãos</dt>
-          <dd>{paciente.tem_irmaos ? paciente.nome_irmaos || "Sim" : "Não"}</dd>
-          <dt className="font-medium text-muted-foreground">Observações</dt>
-          <dd>{paciente.observacoes || "-"}</dd>
-          {acessoClinico && (
-            <>
-              <dt className="font-medium text-muted-foreground">Queixa principal da família</dt>
-              <dd>{paciente.queixa_principal || "-"}</dd>
-              <dt className="font-medium text-muted-foreground">Diagnóstico</dt>
-              <dd>{paciente.diagnostico || "-"}</dd>
-              <dt className="font-medium text-muted-foreground">Faz uso de medicamento</dt>
-              <dd>{paciente.faz_uso_medicamento || "-"}</dd>
-              <dt className="font-medium text-muted-foreground">Início</dt>
-              <dd>{paciente.data_inicio || "-"}</dd>
-              <dt className="font-medium text-muted-foreground">Informações ao nascer</dt>
-              <dd>{paciente.informacoes_nascimento || "-"}</dd>
-            </>
-          )}
-        </dl>
-      </Card>
+      <Tabs defaultValue="visao-geral">
+        <TabsList>
+          <TabsTrigger value="visao-geral">Visão geral</TabsTrigger>
+          {acessoClinico && <TabsTrigger value="planejamento">Planejamento</TabsTrigger>}
+          <TabsTrigger value="protocolos">Protocolos</TabsTrigger>
+          {acessoClinico && <TabsTrigger value="clinico">Clínico</TabsTrigger>}
+          <TabsTrigger value="anexos">Anexos</TabsTrigger>
+        </TabsList>
 
-      <ProfissionaisSection pacienteId={id} />
-      <ProtocolosSection pacienteId={id} />
+        <TabsContent value="visao-geral">
+          <Card className="p-6">
+            <h2 className="mb-4 text-base font-semibold text-foreground">Dados cadastrais</h2>
+            <dl className="grid grid-cols-[max-content_1fr] gap-x-5 gap-y-2.5 text-sm">
+              <dt className="font-medium text-muted-foreground">Data de nascimento</dt>
+              <dd>{paciente.data_nascimento} ({paciente.idade} anos)</dd>
+              <dt className="font-medium text-muted-foreground">Nome da mãe</dt>
+              <dd>{paciente.nome_mae}</dd>
+              <dt className="font-medium text-muted-foreground">Nome do pai</dt>
+              <dd>{paciente.nome_pai}</dd>
+              <dt className="font-medium text-muted-foreground">Tem irmãos</dt>
+              <dd>{paciente.tem_irmaos ? paciente.nome_irmaos || "Sim" : "Não"}</dd>
+              <dt className="font-medium text-muted-foreground">Observações</dt>
+              <dd>{paciente.observacoes || "-"}</dd>
+              {acessoClinico && (
+                <>
+                  <dt className="font-medium text-muted-foreground">Queixa principal da família</dt>
+                  <dd>{paciente.queixa_principal || "-"}</dd>
+                  <dt className="font-medium text-muted-foreground">Diagnóstico</dt>
+                  <dd>{paciente.diagnostico || "-"}</dd>
+                  <dt className="font-medium text-muted-foreground">Faz uso de medicamento</dt>
+                  <dd>{paciente.faz_uso_medicamento || "-"}</dd>
+                  <dt className="font-medium text-muted-foreground">Início</dt>
+                  <dd>{paciente.data_inicio || "-"}</dd>
+                  <dt className="font-medium text-muted-foreground">Informações ao nascer</dt>
+                  <dd>{paciente.informacoes_nascimento || "-"}</dd>
+                </>
+              )}
+            </dl>
+          </Card>
 
-      {acessoClinico && (
-        <>
-          <CaaSection pacienteId={id} />
-          <EvolucoesSection pacienteId={id} />
-          <TermosSection pacienteId={id} />
-        </>
-      )}
+          <ProfissionaisSection pacienteId={id} />
+        </TabsContent>
 
-      <AnexosSection pacienteId={id} />
+        {acessoClinico && (
+          <TabsContent value="planejamento">
+            <TarefasSection pacienteId={id} />
+          </TabsContent>
+        )}
+
+        <TabsContent value="protocolos">
+          <ProtocolosSection pacienteId={id} />
+        </TabsContent>
+
+        {acessoClinico && (
+          <TabsContent value="clinico">
+            <CaaSection pacienteId={id} />
+            <EvolucoesSection pacienteId={id} />
+            <TermosSection pacienteId={id} />
+          </TabsContent>
+        )}
+
+        <TabsContent value="anexos">
+          <AnexosSection pacienteId={id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

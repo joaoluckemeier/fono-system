@@ -211,3 +211,32 @@ export interface TermoGerado {
   criado_em: string;
   atualizado_em: string;
 }
+
+export type Prioridade = "alta" | "media" | "baixa";
+
+export interface Tarefa {
+  id: string;
+  clinica_id: string;
+  paciente_id: string;
+  data: string;
+  titulo: string;
+  descricao: string | null;
+  prioridade: Prioridade;
+  concluido: boolean;
+  concluido_em: string | null;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface TarefaInput {
+  data: string;
+  titulo: string;
+  descricao?: string | null;
+  prioridade?: Prioridade;
+}
+
+export interface TarefasPorPaciente {
+  paciente_id: string;
+  paciente_nome: string;
+  tarefas: Tarefa[];
+}

@@ -58,6 +58,19 @@ from backend.application.use_cases.protocolos.listar_protocolos import ListarPro
 from backend.application.use_cases.protocolos.listar_protocolos_paciente import (
     ListarProtocolosPacienteUseCase,
 )
+from backend.application.use_cases.tarefas.atualizar_tarefa import AtualizarTarefaUseCase
+from backend.application.use_cases.tarefas.criar_tarefa import CriarTarefaUseCase
+from backend.application.use_cases.tarefas.deletar_tarefa import DeletarTarefaUseCase
+from backend.application.use_cases.tarefas.duplicar_tarefas import DuplicarTarefasUseCase
+from backend.application.use_cases.tarefas.listar_planejamento_semana import (
+    ListarPlanejamentoSemanaUseCase,
+)
+from backend.application.use_cases.tarefas.listar_tarefas_paciente import (
+    ListarTarefasPacienteUseCase,
+)
+from backend.application.use_cases.tarefas.marcar_conclusao_tarefa import (
+    MarcarConclusaoTarefaUseCase,
+)
 from backend.application.use_cases.termos.atualizar_modelo_termo import AtualizarModeloTermoUseCase
 from backend.application.use_cases.termos.criar_modelo_termo import CriarModeloTermoUseCase
 from backend.application.use_cases.termos.deletar_modelo_termo import DeletarModeloTermoUseCase
@@ -75,6 +88,7 @@ from backend.domain.repositories.profissional_caso_repository import Profissiona
 from backend.domain.repositories.protocolo_paciente_repository import ProtocoloPacienteRepository
 from backend.domain.repositories.protocolo_repository import ProtocoloRepository
 from backend.domain.repositories.refresh_token_repository import RefreshTokenRepository
+from backend.domain.repositories.tarefa_repository import TarefaRepository
 from backend.domain.repositories.termo_gerado_repository import TermoGeradoRepository
 from backend.domain.repositories.usuario_repository import UsuarioRepository
 from backend.domain.services.ai_gateway_service import AIGatewayInterface
@@ -106,6 +120,7 @@ from backend.infrastructure.repositories.protocolo_paciente_repository import (
 )
 from backend.infrastructure.repositories.protocolo_repository import ProtocoloRepositoryImpl
 from backend.infrastructure.repositories.refresh_token_repository import RefreshTokenRepositoryImpl
+from backend.infrastructure.repositories.tarefa_repository import TarefaRepositoryImpl
 from backend.infrastructure.repositories.termo_gerado_repository import TermoGeradoRepositoryImpl
 from backend.infrastructure.repositories.usuario_repository import UsuarioRepositoryImpl
 from backend.infrastructure.storage.minio_storage import MinIOStorageService
@@ -198,6 +213,10 @@ def get_evolucao_repository(session: AsyncSession = Depends(get_session)) -> Evo
 
 def get_anexo_repository(session: AsyncSession = Depends(get_session)) -> AnexoRepository:
     return AnexoRepositoryImpl(session)
+
+
+def get_tarefa_repository(session: AsyncSession = Depends(get_session)) -> TarefaRepository:
+    return TarefaRepositoryImpl(session)
 
 
 def get_clinica_repository(session: AsyncSession = Depends(get_session)) -> ClinicaRepository:
@@ -416,6 +435,53 @@ def get_deletar_evolucao_use_case(
     storage_service: StorageServiceInterface = Depends(get_storage_service),
 ) -> DeletarEvolucaoUseCase:
     return DeletarEvolucaoUseCase(evolucao_repository, storage_service)
+
+
+# --- Tarefas (planejamento terapeutico semanal) use cases ---
+
+
+def get_criar_tarefa_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+    paciente_repository: PacienteRepository = Depends(get_paciente_repository),
+) -> CriarTarefaUseCase:
+    return CriarTarefaUseCase(tarefa_repository, paciente_repository)
+
+
+def get_listar_tarefas_paciente_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+) -> ListarTarefasPacienteUseCase:
+    return ListarTarefasPacienteUseCase(tarefa_repository)
+
+
+def get_listar_planejamento_semana_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+    paciente_repository: PacienteRepository = Depends(get_paciente_repository),
+) -> ListarPlanejamentoSemanaUseCase:
+    return ListarPlanejamentoSemanaUseCase(tarefa_repository, paciente_repository)
+
+
+def get_atualizar_tarefa_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+) -> AtualizarTarefaUseCase:
+    return AtualizarTarefaUseCase(tarefa_repository)
+
+
+def get_marcar_conclusao_tarefa_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+) -> MarcarConclusaoTarefaUseCase:
+    return MarcarConclusaoTarefaUseCase(tarefa_repository)
+
+
+def get_duplicar_tarefas_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+) -> DuplicarTarefasUseCase:
+    return DuplicarTarefasUseCase(tarefa_repository)
+
+
+def get_deletar_tarefa_use_case(
+    tarefa_repository: TarefaRepository = Depends(get_tarefa_repository),
+) -> DeletarTarefaUseCase:
+    return DeletarTarefaUseCase(tarefa_repository)
 
 
 # --- Anexos use cases ---

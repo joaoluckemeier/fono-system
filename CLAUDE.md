@@ -74,7 +74,7 @@ Detalhes: `docs/arquitetura.md`
 
 - Arquitetura completa, container, enums, DTOs vs Schemas → `docs/arquitetura.md`
 - Estrutura de pastas com explicação de cada uma → `docs/estrutura.md`
-- Modelagem do banco (11 tabelas) → `docs/modelagem.md`
+- Modelagem do banco (14 tabelas) → `docs/modelagem.md`
 - Segurança por fase de risco → `docs/seguranca.md`
 - Gestão de pacotes e supply chain → `docs/supply-chain.md`
 - Observabilidade (logs, métricas, tracing) → `docs/observabilidade.md`

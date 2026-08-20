@@ -57,6 +57,8 @@ espalhado em `if` soltos dentro de cada endpoint.
 | Anexar arquivo | ✅ | ✅ | ✅ (não-clínico) |
 | Gerenciar modelos de termo/encaminhamento | ✅ | ❌ | ❌ |
 | Gerar termo/encaminhamento para um paciente | ✅ | ✅ | ❌ |
+| Criar/editar/concluir tarefas de planejamento terapêutico | ✅ | ✅ | ❌ |
+| Ver planejamento semanal (por paciente ou agregado) | ✅ | ✅ | ❌ |
 | Gerenciar usuários da clínica | ✅ | ❌ | ❌ |
 | Ver logs de auditoria | ✅ | ❌ | ❌ |
 

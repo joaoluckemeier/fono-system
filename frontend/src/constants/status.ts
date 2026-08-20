@@ -1,5 +1,5 @@
 import type { KanbanColunaConfig } from "../components/kanban/KanbanBoard";
-import type { StatusEvolucao, StatusPaciente, StatusProtocoloPaciente } from "../types/api";
+import type { Prioridade, StatusEvolucao, StatusPaciente, StatusProtocoloPaciente } from "../types/api";
 
 export const COLUNAS_STATUS_PACIENTE: KanbanColunaConfig[] = [
   { id: "em_avaliacao", titulo: "Em avaliação", cor: "#2563eb" },
@@ -37,4 +37,16 @@ export const COLUNAS_STATUS_EVOLUCAO: KanbanColunaConfig[] = [
 export const LABEL_STATUS_EVOLUCAO: Record<StatusEvolucao, string> = {
   pendente_revisao: "Pendente de revisão",
   confirmada: "Confirmada",
+};
+
+export const LABEL_PRIORIDADE_TAREFA: Record<Prioridade, string> = {
+  alta: "Alta",
+  media: "Média",
+  baixa: "Baixa",
+};
+
+export const CLASSE_BADGE_PRIORIDADE: Record<Prioridade, string> = {
+  alta: "border-red-300 bg-red-50 text-red-700",
+  media: "border-amber-300 bg-amber-50 text-amber-700",
+  baixa: "border-slate-300 bg-slate-50 text-slate-600",
 };

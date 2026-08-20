@@ -9,6 +9,7 @@ from backend.domain.entities.evolucao import Evolucao, StatusEvolucao
 from backend.domain.entities.modelo_termo import ModeloTermo
 from backend.domain.entities.paciente import Paciente
 from backend.domain.entities.refresh_token import RefreshToken
+from backend.domain.entities.tarefa import Tarefa
 from backend.domain.entities.termo_gerado import TermoGerado
 from backend.domain.entities.usuario import Usuario
 from backend.domain.repositories.anexo_repository import AnexoRepository
@@ -17,6 +18,7 @@ from backend.domain.repositories.evolucao_repository import EvolucaoRepository
 from backend.domain.repositories.modelo_termo_repository import ModeloTermoRepository
 from backend.domain.repositories.paciente_repository import PacienteRepository
 from backend.domain.repositories.refresh_token_repository import RefreshTokenRepository
+from backend.domain.repositories.tarefa_repository import TarefaRepository
 from backend.domain.repositories.termo_gerado_repository import TermoGeradoRepository
 from backend.domain.repositories.usuario_repository import UsuarioRepository
 from backend.domain.services.ai_gateway_service import AIGatewayInterface
@@ -160,6 +162,61 @@ class FakeEvolucaoRepository(EvolucaoRepository):
             if e.status is StatusEvolucao.CONFIRMADA
         ]
         return registros[0] if registros else None
+
+
+class FakeTarefaRepository(TarefaRepository):
+    def __init__(self) -> None:
+        self._tarefas: dict[UUID, Tarefa] = {}
+
+    async def salvar(self, entidade: Tarefa) -> Tarefa:
+        self._tarefas[entidade.id] = entidade
+        return entidade
+
+    async def buscar_por_id(self, id: UUID, clinica_id: UUID) -> Tarefa | None:
+        tarefa = self._tarefas.get(id)
+        if tarefa is None or tarefa.clinica_id != clinica_id or tarefa.deletado:
+            return None
+        return tarefa
+
+    async def listar(self, clinica_id: UUID) -> list[Tarefa]:
+        return [
+            t for t in self._tarefas.values() if t.clinica_id == clinica_id and not t.deletado
+        ]
+
+    async def soft_delete(self, id: UUID, clinica_id: UUID) -> None:
+        tarefa = self._tarefas.get(id)
+        if tarefa is not None and tarefa.clinica_id == clinica_id:
+            tarefa.deletado = True
+            tarefa.deletado_em = datetime.now()
+
+    async def listar_por_paciente_periodo(
+        self, paciente_id: UUID, clinica_id: UUID, data_inicio, data_fim
+    ) -> list[Tarefa]:
+        return sorted(
+            (
+                t
+                for t in self._tarefas.values()
+                if t.paciente_id == paciente_id
+                and t.clinica_id == clinica_id
+                and not t.deletado
+                and data_inicio <= t.data <= data_fim
+            ),
+            key=lambda t: t.data,
+        )
+
+    async def listar_por_periodo(
+        self, clinica_id: UUID, data_inicio, data_fim
+    ) -> list[Tarefa]:
+        return sorted(
+            (
+                t
+                for t in self._tarefas.values()
+                if t.clinica_id == clinica_id
+                and not t.deletado
+                and data_inicio <= t.data <= data_fim
+            ),
+            key=lambda t: (str(t.paciente_id), t.data),
+        )
 
 
 class FakeAnexoRepository(AnexoRepository):

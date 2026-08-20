@@ -159,6 +159,28 @@ nunca é um campo próprio, é sempre a evolução mais recente desta tabela.
 
 ---
 
+### tarefas_planejamento
+Planejamento terapêutico semanal — checklist de tarefas soltas atreladas a um
+paciente, com data de referência (não existe um objeto "semana" separado; a
+semana é só um filtro de consulta por intervalo de datas). Conclusão é um
+checkbox simples, estilo Todoist, sem estados intermediários. Duplicação de
+tarefas de uma semana pra outra é manual/seletiva — sem motor de recorrência
+automática.
+
+| Campo | Tipo | Obs |
+|---|---|---|
+| id | UUID | PK |
+| clinica_id | UUID | FK → clinicas |
+| paciente_id | UUID | FK → pacientes |
+| data | DATE | data de referência da tarefa (dá o dia da semana) |
+| titulo | VARCHAR | |
+| descricao | TEXT | nullable |
+| prioridade | VARCHAR | 'alta', 'media', 'baixa' |
+| concluido | BOOLEAN | default false |
+| concluido_em | TIMESTAMP | nullable, preenchido ao marcar concluído |
+
+---
+
 ### anexos
 Arquivo associado a paciente, evolução ou protocolo aplicado. Polimórfico —
 Aberto/Fechado (OCP): novos tipos de entidade anexável não exigem alteração de
@@ -253,6 +275,7 @@ clinicas
   │     ├── evolucoes (paciente_id)
   │     │     └── usuarios (usuario_id, quem registrou)
   │     ├── anexos (entidade_id → paciente | evolucao | protocolo_paciente)
+  │     ├── tarefas_planejamento (paciente_id)
   │     └── termos_gerados (paciente_id)
   │           ├── modelos_termo (modelo_id, catálogo por clínica)
   │           └── anexos (anexo_id, o PDF gerado)

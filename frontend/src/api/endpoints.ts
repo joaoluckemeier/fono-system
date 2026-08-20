@@ -18,6 +18,9 @@ import type {
   ProtocoloPacienteInput,
   StatusPaciente,
   StatusProtocoloPaciente,
+  Tarefa,
+  TarefaInput,
+  TarefasPorPaciente,
   TermoGerado,
   TokenPar,
   UsuarioAutenticado,
@@ -136,4 +139,32 @@ export const termosApi = {
       method: "POST",
       body: { modelo_id: modeloId },
     }),
+};
+
+export const tarefasApi = {
+  listar: (pacienteId: string, dataInicio?: string, dataFim?: string) => {
+    const params = new URLSearchParams();
+    if (dataInicio) params.set("data_inicio", dataInicio);
+    if (dataFim) params.set("data_fim", dataFim);
+    const query = params.toString();
+    return apiFetch<Tarefa[]>(`/pacientes/${pacienteId}/tarefas${query ? `?${query}` : ""}`);
+  },
+  criar: (pacienteId: string, dados: TarefaInput) =>
+    apiFetch<Tarefa>(`/pacientes/${pacienteId}/tarefas`, { method: "POST", body: dados }),
+  atualizar: (pacienteId: string, id: string, dados: TarefaInput) =>
+    apiFetch<Tarefa>(`/pacientes/${pacienteId}/tarefas/${id}`, { method: "PATCH", body: dados }),
+  marcarConcluido: (pacienteId: string, id: string, concluido: boolean) =>
+    apiFetch<Tarefa>(`/pacientes/${pacienteId}/tarefas/${id}/concluir`, {
+      method: "PATCH",
+      body: { concluido },
+    }),
+  deletar: (pacienteId: string, id: string) =>
+    apiFetch<void>(`/pacientes/${pacienteId}/tarefas/${id}`, { method: "DELETE" }),
+};
+
+export const planejamentoApi = {
+  semana: (dataInicio: string, dataFim: string) =>
+    apiFetch<TarefasPorPaciente[]>(
+      `/planejamento/semana?data_inicio=${dataInicio}&data_fim=${dataFim}`,
+    ),
 };
